@@ -25,15 +25,15 @@ jobs:
           python gen_index_json.py
 
       - name: Commit and push updated index files
-      run: |
-         git config user.name "GitHub Actions"
-         git config user.email "actions@github.com"
-         git add .
-         git commit -m "Update index files"
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Update index files" || echo "No changes to commit"
 
-     - name: Push changes
-      uses: ad-m/github-push-action@v0.6.0
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: main
-        force: false
+      - name: Push changes
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+          force: false
