@@ -1,0 +1,266 @@
+<html lang="en">
+<head>
+    <title>FoT Daily Broadcaster 🛰️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Load Showdown library directly -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+</head>
+<body class="theme-light">
+    <div class="app-wrapper">
+        <header class="app-header">
+            <div class="logo-container">
+                <div class="logo-satellite">
+                    <div class="satellite-body">
+                        <div class="satellite-panel left"></div>
+                        <div class="satellite-panel right"></div>
+                        <div class="satellite-antenna"></div>
+                    </div>
+                </div>
+                <h1>FoT Daily Broadcaster</h1>
+            </div>
+            <div class="theme-switcher">
+                <label for="theme-select">Theme:</label>
+                <select id="theme-select">
+                    <option value="theme-light">Light</option>
+                    <option value="theme-dark">Dark</option>
+                    <option value="theme-futuristic">Futuristic</option>
+                    <option value="theme-retro">Old Fashion</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="folder-section section-card">
+                    <h2><i class="fas fa-folder-open"></i> Folder Selection</h2>
+                    <div class="form-group">
+                        <label for="folder-name">📂 Select Folder:</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-search input-icon"></i>
+                            <input type="text" id="folder-name" name="folder-name" placeholder="Loading folders..." list="folder-list">
+                            <datalist id="folder-list">
+                                <!-- Options will be populated by JavaScript -->
+                            </datalist>
+                        </div>
+                        <div id="folder-status" class="status-message"></div>
+                    </div>
+                    
+                    <div class="folder-metadata">
+                        <h3><i class="fas fa-tags"></i> Folder Metadata</h3>
+                        <div class="metadata-grid">
+                            <div class="metadata-item">
+                                <span class="metadata-label">Date:</span>
+                                <span id="parsed-date" class="metadata-value">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Title:</span>
+                                <span id="parsed-title" class="metadata-value">-</span>
+                            </div>
+                            <div class="metadata-item">
+                                <span class="metadata-label">Slug:</span>
+                                <span id="parsed-slug" class="metadata-value">-</span>
+                            </div>
+                        </div>
+                        <button id="export-metadata" class="btn btn-secondary">
+                            <i class="fas fa-file-export"></i> Export metadata.json
+                        </button>
+                    </div>
+                </div>
+
+                <div class="about-section section-card">
+                    <h3><i class="fas fa-info-circle"></i> About FoT</h3>
+                    <p>Freedom of Test (FoT) is a daily AI experimentation project comparing different AI models on the same prompts.</p>
+                    <p class="small">Click the satellite for a surprise 👆</p>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <!-- New Prompt Creator Section -->
+                <div class="prompt-creator-section section-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-magic"></i> Prompt Creator</h2>
+                        <button id="toggle-prompt-creator" class="toggle-btn" aria-label="Toggle prompt creator section">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                    <div id="prompt-creator-content">
+                        <div class="prompt-creator-info">
+                            <p>Need inspiration? Generate creative, philosophical prompts for your AI experiments!</p>
+                            <div class="prompt-creator-icon">
+                                <svg class="planet-icon" viewBox="0 0 100 100" width="40" height="40">
+                                    <circle cx="50" cy="50" r="40" fill="var(--accent-color)" opacity="0.2"/>
+                                    <circle cx="50" cy="50" r="35" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+                                    <path d="M30,55 Q50,35 70,55" fill="none" stroke="var(--accent-color)" stroke-width="2"/>
+                                    <circle cx="30" cy="50" r="5" fill="var(--accent-color)" opacity="0.6"/>
+                                    <circle cx="70" cy="50" r="3" fill="var(--accent-color)" opacity="0.8"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="prompt-actions">
+                            <button id="generate-prompt-btn" class="btn btn-primary">
+                                <i class="fas fa-wand-magic-sparkles"></i> Generate Prompt
+                            </button>
+                        </div>
+                        <div id="generated-prompts" class="generated-prompts-container">
+                            <!-- Prompts will be generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Image Folder Manager Section -->
+                <div class="image-manager-section section-card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-images"></i> Image Folder Manager</h2>
+                        <button id="toggle-image-manager" class="toggle-btn" aria-label="Toggle image manager section">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </div>
+                    <div id="image-manager-content">
+                        <div class="image-upload-area">
+                            <button id="upload-images-btn" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Upload Images
+                            </button>
+                            <input type="file" id="image-file-input" accept="image/*" multiple>
+                            
+                            <button id="clear-all-images-btn" class="btn btn-secondary">
+                                <i class="fas fa-trash-alt"></i> Clear All
+                            </button>
+                            
+                            <div class="upload-status-container">
+                                <div id="upload-status" class="status-message"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="image-category-tabs">
+                            <button class="tab-btn active" data-category="all">All Images</button>
+                            <button class="tab-btn" data-category="gpt">GPT Images</button>
+                            <button class="tab-btn" data-category="grok">Grok Images</button>
+                            <button class="tab-btn" data-category="midjourney">Midjourney Images</button>
+                            <button class="tab-btn" data-category="">Uncategorized</button>
+                        </div>
+                        
+                        <div id="image-manager" class="image-gallery-content">
+                            <!-- Images will be loaded here dynamically -->
+                        </div>
+                        
+                        <div class="attach-buttons">
+                            <button id="attach-to-gpt-btn" class="btn btn-secondary">
+                                <i class="fas fa-robot"></i> Attach to GPT
+                            </button>
+                            <button id="attach-to-grok-btn" class="btn btn-secondary">
+                                <i class="fas fa-brain"></i> Attach to Grok
+                            </button>
+                            <button id="attach-to-midjourney-btn" class="btn btn-secondary">
+                                <i class="fas fa-paint-brush"></i> Attach to Midjourney
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section section-card">
+                    <div class="form-group">
+                        <label for="date">📅 Date:</label>
+                        <input type="text" id="date" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prompt">📝 Prompt used (loaded from Prompt.txt):</label>
+                        <textarea id="prompt" name="prompt" rows="4" placeholder="Waiting for Prompt.txt..."></textarea>
+                        <div id="prompt-status" class="status-message error"></div>
+                    </div>
+
+                    <div class="model-outputs">
+                        <div class="model-section">
+                            <h3><i class="fas fa-robot"></i> GPT-4 Realization</h3>
+                            <textarea id="gpt4-realization" name="gpt4-realization" rows="4" placeholder="Enter GPT-4's response..."></textarea>
+                            <div class="image-section">
+                                <h4>GPT Images:</h4>
+                                <div id="gpt-image-previews" class="image-preview-grid">
+                                    <!-- Images will be loaded here by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="model-section">
+                            <h3><i class="fas fa-brain"></i> Grok Realization</h3>
+                            <textarea id="grok-realization" name="grok-realization" rows="4" placeholder="Enter Grok's response..."></textarea>
+                            <div class="image-section">
+                                <h4>Grok Images:</h4>
+                                <div id="grok-image-previews" class="image-preview-grid">
+                                    <!-- Images will be loaded here by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="model-section">
+                            <h3><i class="fas fa-paint-brush"></i> Midjourney</h3>
+                            <div class="form-group">
+                                <label for="midjourney-prompt">Prompt Used:</label>
+                                <input type="text" id="midjourney-prompt" name="midjourney-prompt" placeholder="Enter the Midjourney prompt...">
+                            </div>
+                            <div class="image-section">
+                                <h4>Midjourney Images:</h4>
+                                <div id="midjourney-image-previews" class="image-preview-grid">
+                                    <!-- Images will be loaded here by JS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="folder-link">🔗 Auto-generated folder link:</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-link input-icon"></i>
+                            <input type="text" id="folder-link" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comment">💬 Comment (optional):</label>
+                        <textarea id="comment" name="comment" rows="3" placeholder="Add any additional comments here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="preview-section section-card">
+                    <h2><i class="fas fa-file-alt"></i> Markdown Preview</h2>
+                    <div class="preview-tabs">
+                        <button class="tab-btn active" data-tab="preview">Rendered</button>
+                        <button class="tab-btn" data-tab="raw">Raw</button>
+                    </div>
+                    <div class="tab-content">
+                        <div id="tab-preview" class="tab-pane active">
+                            <div id="markdown-preview"></div>
+                        </div>
+                        <div id="tab-raw" class="tab-pane">
+                            <pre id="markdown-raw" class="markdown-raw-view"></pre>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="copy-markdown-button" class="btn btn-primary">
+                            <i class="fas fa-copy"></i> Copy Markdown
+                        </button>
+                        <button id="send-discord-button" class="btn btn-discord" title="Copies Markdown for pasting into Discord">
+                            <i class="fab fa-discord"></i> Send to Discord
+                        </button>
+                        <button id="send-telegram-button" class="btn btn-telegram" title="Copies Markdown for pasting into Telegram">
+                            <i class="fab fa-telegram"></i> Send to Telegram
+                        </button>
+                        <button id="send-to-discord-webhook" class="btn btn-discord-webhook">
+                            <i class="fab fa-discord"></i> Push to Discord (webhook)
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="app-footer">
+            <p>FoT Daily Broadcaster &copy; 2024 — <span class="easter-egg-trigger">Version <span class="version">1.2.0</span></span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
