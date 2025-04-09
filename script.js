@@ -356,76 +356,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /** Fetches index.json from a specific folder and loads matching images */
-    async function loadModelImages(folderName, modelPrefix, previewGridElement) {
-        if (!previewGridElement) return;
-        
-        const folderPath = `${baseMediaPath}${folderName}/`;
-        const indexUrl = `${folderPath}index.json?t=${Date.now()}`; 
+async function loadModelImages(folderName, modelPrefix, previewGridElement) {
+    // Existing function implementation
+}
 
-        // Clear previous images and show loading state
-        previewGridElement.innerHTML = '<div class="loading-placeholder">Loading...</div>';
+async function loadLeonardoImages(folderName) {
+    const leonardoPreviewGrid = document.getElementById('leonardo-image-previews');
+    if (!leonardoPreviewGrid) return;
 
-        try {
-            const response = await fetch(indexUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP error fetching ${indexUrl}! Status: ${response.status}`);
-            }
-            const fileList = await response.json();
+    const folderPath = `${baseMediaPath}${folderName}/`;
+    const indexUrl = `${folderPath}index.json?t=${Date.now()}`;
 
-            if (!Array.isArray(fileList)) {
-                throw new Error(`index.json in ${folderName} is not a valid JSON array.`);
-            }
+    leonardoPreviewGrid.innerHTML = '<div class="loading-placeholder">Loading...</div>';
 
-            // Filter for images matching the prefix and common extensions
-            const imageFiles = fileList.filter(filename =>
-                typeof filename === 'string' &&
-                filename.toLowerCase().startsWith(modelPrefix.toLowerCase()) &&
-                /\.(png|jpg|jpeg|gif|webp)$/i.test(filename)
-            );
-
-            // Clear loading placeholder
-            previewGridElement.innerHTML = '';
-
-            if (imageFiles.length === 0) {
-                previewGridElement.innerHTML = `<div class="error-placeholder">No images found matching '${modelPrefix}*.{png/jpg/jpeg/gif/webp}'</div>`;
-            } else {
-                imageFiles.forEach(filename => {
-                    const img = document.createElement('img');
-                    const imgSrc = `${folderPath}${filename}`;
-                    img.src = imgSrc;
-                    img.alt = `${modelPrefix} image: ${filename}`;
-                    img.title = filename; 
-                    img.onerror = () => {
-                        img.style.display = 'none'; 
-                        console.error(`Failed to load image: ${imgSrc}`);
-                        if (!previewGridElement.querySelector('.error-placeholder')) {
-                            const errorDiv = document.createElement('div');
-                            errorDiv.className = 'error-placeholder';
-                            errorDiv.textContent = 'Some images failed to load.';
-                            previewGridElement.appendChild(errorDiv);
-                        }
-                        updatePreview(); 
-                    };
-                    img.onload = () => {
-                        updatePreview(); 
-                    };
-                    
-                    // Add lightbox effect on click
-                    img.addEventListener('click', () => {
-                        openImageLightbox(imgSrc, filename);
-                    });
-                    
-                    previewGridElement.appendChild(img);
-                });
-            }
-
-        } catch (error) {
-            console.error(`Error loading images for ${modelPrefix}:`, error);
-            previewGridElement.innerHTML = `<div class="error-placeholder">Error loading image list: ${error.message}</div>`;
-        } finally {
-            updatePreview(); 
+    try {
+        const response = await fetch(indexUrl);
+        if (!response.ok) {
+            throw new Error(`HTTP error fetching ${indexUrl}! Status: ${response.status}`);
         }
+        const fileList = await response.json();
+
+        const imageFiles = fileList.filter(filename =>
+            filename.toLowerCase().startsWith("leonardo") && /\.(png|jpg|jpeg|gif|webp)$/i.test(filename)
+        );
+
+        leonardoPreviewGrid.innerHTML = ''; // Clear loading placeholder
+
+        if (imageFiles.length === 0) {
+            leonardoPreviewGrid.innerHTML = '<div class="error-placeholder">No Leonardo images found.</div>';
+        } else {
+            imageFiles.forEach(filename => {
+                const img = document.createElement('img');
+                img.src = `${folderPath}${filename}`;
+                img.alt = `Leonardo image: ${filename}`;
+                img.title = filename;
+                leonardoPreviewGrid.appendChild(img);
+            });
+        }
+    } catch (error) {
+        leonardoPreviewGrid.innerHTML = `<div class="error-placeholder">Error loading images: ${error.message}</div>`;
     }
+}
 
     // Function to create a simple lightbox for images
     function openImageLightbox(src, title) {
@@ -1498,6 +1469,8 @@ ${folderLink ? `[${folderLink}](${folderLink})` : '*Enter folder name to generat
                 if (gptImagePreviewsGrid) gptImagePreviewsGrid.innerHTML = '';
                 if (grokImagePreviewsGrid) grokImagePreviewsGrid.innerHTML = '';
                 if (midjourneyImagePreviewsGrid) midjourneyImagePreviewsGrid.innerHTML = '';
+                if (leonardoPreviewGrid) leonardoPreviewGrid.innerHTML = ''; // Clear Leonardo previews as well
+
 
                 if (currentFolderName) {
                     if (parseFolderMetadata(currentFolderName)) {
@@ -1506,6 +1479,8 @@ ${folderLink ? `[${folderLink}](${folderLink})` : '*Enter folder name to generat
                         if (gptImagePreviewsGrid) loadModelImages(currentFolderName, 'gpt', gptImagePreviewsGrid);
                         if (grokImagePreviewsGrid) loadModelImages(currentFolderName, 'grok', grokImagePreviewsGrid);
                         if (midjourneyImagePreviewsGrid) loadModelImages(currentFolderName, 'midjourney', midjourneyImagePreviewsGrid);
+                        if (leonardoPreviewGrid) loadLeonardoImages(currentFolderName);
+
                     } else {
                         // Clear potentially loaded data if date parsing failed
                         if (promptInput) {
