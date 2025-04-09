@@ -1,0 +1,33 @@
+name: 🔁 Auto-generate index.json
+
+on:
+  push:
+    paths:
+      - 'Done/**'
+      - '.github/workflows/index-builder.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Generate index files
+        run: node scripts/build-index.js
+
+      - name: Commit and push index.json files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Done/*/index.json
+          git commit -m "🔄 Auto-generated index.json files" || echo "No changes to commit"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
