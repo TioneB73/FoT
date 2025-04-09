@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Global State ---
     let currentFolderName = '';
     let currentFormattedDate = '';
-    let baseMediaPath = 'https://tioneb73.github.io/freedom-of-test/media/';
+    let baseMediaPath = 'https://tioneb73.github.io/FoT/Done/';
     let folderMetadata = {
         date: '',
         title: '',
