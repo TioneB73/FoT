@@ -1560,9 +1560,21 @@ ${folderLink ? `[${folderLink}](${folderLink})` : '*Enter folder name to generat
             sendToDiscordWebhook.addEventListener('click', () => {
                 const markdown = markdownRaw.textContent;
 
-                const payload = {
-                    content: "```markdown\n" + markdown + "\n```"
-                };
+               const payload = {
+                content: `📂 **${currentFolderName}** – FoT Daily Broadcast`,
+                embeds: [
+                  {
+                   title: "🧠 Grok Output",
+                  image: {
+                  url: `${baseMediaPath}${currentFolderName}/grok.jpg`
+               },
+              footer: {
+               text: `From folder: ${currentFolderName}`
+              }
+            }
+         ]
+      };
+
 
                 fetch('https://discord.com/api/webhooks/1358806590278336563/_8iIu-FjgMiW3pJkeZNwuBOkglmkmU2cUn0zS5KqT4AlLnca9g0kV8ZjQx7x2H-FkJtN', {
                     method: 'POST',
